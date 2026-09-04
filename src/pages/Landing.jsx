@@ -1,0 +1,37 @@
+import React, { useState } from 'react'
+import { ArrowRight, BriefcaseBusiness, Check, ChevronRight, Compass, GraduationCap, MapPin, Search, Sparkles, Target, Zap } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import OpportunityCard from '../components/opportunities/OpportunityCard'
+import { colleges } from '../data/colleges'
+import { internships } from '../data/internships'
+import { jobs } from '../data/jobs'
+
+const categories = [
+  { icon: GraduationCap, label: 'Colleges', description: 'Find courses you can qualify for', path: '/colleges', color: 'lavender' },
+  { icon: BriefcaseBusiness, label: 'Jobs', description: 'Start your career close to home', path: '/jobs', color: 'mint' },
+  { icon: Zap, label: 'Internships', description: 'Build experience that counts', path: '/internships', color: 'peach' },
+  { icon: Compass, label: 'Career paths', description: 'See your next best move', path: '/paths', color: 'blue' }
+]
+
+const previewOpportunities = [internships[0], colleges[0], jobs[0]]
+
+function SectionHeading({ eyebrow, title, description }) {
+  return <div className="section-heading"><div className="eyebrow">{eyebrow}</div><h2>{title}</h2>{description && <p>{description}</p>}</div>
+}
+
+function HeroPreview({ profile }) {
+  return <div className="hero-preview reveal delay-one"><div className="preview-window"><div className="window-top"><div className="window-dots"><i /><i /><i /></div><span>your edusearch / explore</span><div className="window-menu">•••</div></div><div className="preview-content"><div className="preview-greeting"><span>Good morning, Ananya</span><small>Here’s what’s around you</small></div><div className="preview-location"><MapPin size={14} /> {profile.location || 'Panaji, Goa'} <ChevronRight size={14} /></div><div className="preview-stat-row"><div><small>Profile strength</small><strong>78%</strong><div className="mini-progress"><span /></div></div><div><small>New matches</small><strong>12 <b>↗</b></strong></div></div><div className="preview-label">TOP MATCHES FOR YOU</div><div className="preview-match"><div className="mini-logo mint-logo"><span className="code-mark">&lt;/&gt;</span></div><div><strong>Frontend Developer</strong><small>Northstar Labs · 8.4 km</small></div><span className="match-pill">87%</span></div><div className="preview-match"><div className="mini-logo purple-logo"><GraduationCap size={17} /></div><div><strong>BCA — Computer Applications</strong><small>Goa Digital University · 12 km</small></div><span className="match-pill purple-pill">92%</span></div><div className="preview-map"><span className="map-dot dot-a" /><span className="map-dot dot-b" /><span className="map-dot dot-c" /><span className="map-user"><MapPin size={13} /></span><div className="map-label">12 opportunities nearby <ArrowRight size={12} /></div></div></div></div><div className="floating-card floating-match"><span className="floating-check"><Check size={13} /></span><div><strong>87% match</strong><small>Great fit for your skills</small></div></div><div className="floating-card floating-next"><div className="floating-spark"><Sparkles size={14} /></div><div><small>NEXT BEST STEP</small><strong>Learn React</strong></div><ArrowRight size={15} /></div></div>
+}
+
+export default function Landing({ profile }) {
+  const navigate = useNavigate()
+  const [location, setLocation] = useState(profile.location || '')
+  return <>
+    <section className="hero-section"><div className="hero-glow glow-one" /><div className="hero-glow glow-two" /><div className="container hero-grid"><div className="hero-copy reveal"><div className="eyebrow"><span className="eyebrow-dot" /> A smarter way forward</div><h1>Find what<br /><em>you can do next.</em></h1><p className="hero-description">Discover colleges, jobs, internships and career paths around you — based on your skills, education and goals.</p><div className="hero-search"><MapPin size={19} /><input value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Where are you based?" aria-label="Your location" /><button onClick={() => navigate('/discover')} aria-label="Explore opportunities"><ArrowRight size={20} /></button></div><div className="hero-ctas"><button className="button button-primary" onClick={() => navigate('/discover')}>Explore opportunities <ArrowRight size={17} /></button><Link className="text-button" to="/profile">Build my profile <span>↗</span></Link></div><div className="trust-row"><div className="avatar-stack"><span>R</span><span>S</span><span>K</span></div><span>Built for students, by people who get it</span></div></div><HeroPreview profile={profile} /></div></section>
+    <section className="section works-section"><div className="container"><SectionHeading eyebrow="The EduSearch way" title={<>Your next step, <em>made clearer.</em></>} description="No more guessing what comes after graduation. We connect the dots between where you are and where you want to go." /><div className="steps-grid">{[['01', 'Build your profile', 'Tell us about your education, skills and interests.', Target], ['02', 'Discover what fits', 'Get opportunities matched to your real potential.', Search], ['03', 'Take the next step', 'See exactly what you need to learn or do next.', ArrowRight]].map(([number, title, copy, Icon]) => <div className="step-card" key={number}><span className="step-number">{number}</span><div className="step-icon"><Icon size={21} /></div><h3>{title}</h3><p>{copy}</p></div>)}</div></div></section>
+    <section className="section category-section"><div className="container"><div className="section-head-row"><SectionHeading eyebrow="Explore your options" title={<>There’s more than <em>one way forward.</em></>} /><Link className="arrow-link" to="/discover">View all <ArrowRight size={16} /></Link></div><div className="category-grid">{categories.map(({ icon: Icon, label, description, path, color }) => <Link className={`category-card ${color}`} to={path} key={label}><div className="category-icon"><Icon size={22} /></div><div><h3>{label}</h3><p>{description}</p></div><ArrowRight className="category-arrow" size={18} /></Link>)}</div></div></section>
+    <section className="section opportunities-section"><div className="container"><div className="section-head-row"><SectionHeading eyebrow="Around you" title={<>Opportunities that <em>fit you.</em></>} description="A quick look at what’s waiting nearby. Your match is based on the profile you build." /><Link className="arrow-link" to="/discover">Explore nearby <ArrowRight size={16} /></Link></div><div className="opportunity-grid">{previewOpportunities.map((item) => <OpportunityCard item={item} key={item.title} />)}</div></div></section>
+    <section className="path-banner"><div className="container path-banner-inner"><div><div className="eyebrow">Your route, not a rulebook</div><h2>Student <span>→</span> Learn React <span>→</span> Build projects <span>→</span> Internship</h2><p>See a path that turns your interests into a plan you can actually follow.</p></div><Link className="button button-light" to="/paths">Explore career paths <ArrowRight size={17} /></Link></div></section>
+    <section className="section final-cta"><div className="container final-cta-inner"><Sparkles size={25} /><h2>Your next opportunity could be<br /><em>closer than you think.</em></h2><p>Start with where you are. We’ll help you see what’s possible.</p><Link className="button button-primary" to="/profile">Create your profile <ArrowRight size={17} /></Link></div></section>
+  </>
+}
