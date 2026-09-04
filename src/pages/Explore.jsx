@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { ArrowRight, Bookmark, Check, List, Map as MapIcon, MapPin, Search, X } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { opportunities, getDistanceKm } from '../services/opportunityService'
 import { getProfile } from '../services/profileService'
 import { matchProfileToOpportunity } from '../services/matchingService'
@@ -9,11 +9,14 @@ import { getSavedOpportunityIds, toggleSavedOpportunity } from '../services/save
 import { getSavedCollegeIds, toggleSavedCollege } from '../services/savedCollegeService'
 import { getSavedJobIds, toggleSavedJob } from '../services/savedJobService'
 import { recordInteraction, INTERACTION_EVENTS } from '../services/interactionService'
+import { useAuth } from '../services/authService'
 import SearchBar from '../components/common/SearchBar'
 import FitSummary from '../components/common/FitSummary'
 import { MapCanvas } from './Discover'
 
 export default function Explore() {
+  const navigate = useNavigate()
+  const { configured, user } = useAuth()
   const profile = getProfile()
   const [query, setQuery] = useState('')
   const [type, setType] = useState('All')
@@ -33,6 +36,10 @@ export default function Explore() {
     return true
   }), [distance, fit, profile, query, type])
   const toggleSave = (item) => {
+    if (configured && !user) {
+      navigate('/auth', { state: { from: '/explore' } })
+      return
+    }
     const next = item.type === 'College' ? toggleSavedCollege(item.id) : item.type === 'Job' ? toggleSavedJob(item.id) : toggleSavedOpportunity(item.id)
     setSaved(next)
   }

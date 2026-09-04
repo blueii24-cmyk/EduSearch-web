@@ -1,3 +1,5 @@
+import { getActiveUserId } from './authService'
+
 const FEEDBACK_KEY = 'edusearch-feedback'
 const STUDENT_ID_KEY = 'edusearch_student_id'
 
@@ -11,6 +13,8 @@ function read(key, fallback = []) {
 }
 
 export function getStudentId() {
+  const authenticatedId = getActiveUserId()
+  if (authenticatedId) return authenticatedId
   const existing = localStorage.getItem(STUDENT_ID_KEY)
   if (existing) return existing
   const id = `student-${Date.now()}`
@@ -40,13 +44,42 @@ export function saveFeedback({ opportunityId, opportunityType, feedbackValue, re
   }
 
   localStorage.setItem(FEEDBACK_KEY, JSON.stringify([...getAllFeedback(), record]))
+  submitFeedback(record)
   return record
 }
 
 export function saveGeneralFeedback({ rating, category, comment = '' }) {
   const record = { id: `${getStudentId()}-general-${Date.now()}`, studentId: getStudentId(), type: 'general', rating, category, comment: comment.trim(), createdAt: new Date().toISOString() }
   localStorage.setItem(FEEDBACK_KEY, JSON.stringify([...getAllFeedback(), record]))
+  submitFeedback(record)
   return record
+}
+
+export async function submitFeedback(record) {
+  if (!supabase) return null
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  const { data, error } = await supabase.from('feedback').insert({
+    user_id: user.id,
+    student_id: getActiveUserId() || record.studentId,
+    entity_type: record.opportunityType || null,
+    entity_id: isUuid(record.opportunityId) ? record.opportunityId : null,
+    feedback_type: record.type || 'opportunity',
+    rating: record.rating || record.feedbackValue,
+    reasons: record.reasons || [],
+    comment: record.comment || ''
+  }).select().single()
+  if (error) console.error('Could not sync feedback to Supabase.', error)
+  return data
+}
+
+export async function getMyFeedback() {
+  if (!supabase) return getAllFeedback()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return getAllFeedback()
+  const { data, error } = await supabase.from('feedback').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+  if (error) throw error
+  return data
 }
 
 export function getAllInteractions() {
@@ -63,3 +96,4 @@ export function clearFeedbackData() {
   localStorage.removeItem('edusearch-interactions')
   localStorage.removeItem('edusearch_student_id')
 }
+import { isUuid, supabase } from '../lib/supabaseClient'

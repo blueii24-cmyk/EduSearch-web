@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ArrowLeft, Bookmark, Check, ExternalLink, MapPin } from 'lucide-react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getOpportunityById } from '../services/opportunityService'
 import { getProfile } from '../services/profileService'
 import { matchProfileToOpportunity } from '../services/matchingService'
@@ -11,9 +11,12 @@ import SkillChip from '../components/common/SkillChip'
 import MatchBadge from '../components/common/MatchBadge'
 import FeedbackPrompt from '../components/common/FeedbackPrompt'
 import { recordInteraction, INTERACTION_EVENTS } from '../services/interactionService'
+import { useAuth } from '../services/authService'
 
 export default function OpportunityDetails() {
   const { id } = useParams()
+  const navigate = useNavigate()
+  const { configured, user } = useAuth()
   const item = getOpportunityById(id)
   const profile = getProfile()
   const isJob = item?.type === 'Job'
@@ -28,6 +31,10 @@ export default function OpportunityDetails() {
   const match = matchProfileToOpportunity(profile, item)
   const nextStep = match.missingSkills.length ? `Learn ${match.missingSkills.slice(0, 2).join(' and ')}, then build one project before applying.` : 'Apply now — your current skills align well.'
   const toggleSave = () => {
+    if (configured && !user) {
+      navigate('/auth', { state: { from: `/opportunity/${id}` } })
+      return
+    }
     const nextSaved = (isJob ? toggleSavedJob(id) : toggleSavedOpportunity(id)).includes(id)
     setSaved(nextSaved)
     recordInteraction(nextSaved ? INTERACTION_EVENTS.OPPORTUNITY_SAVED : INTERACTION_EVENTS.OPPORTUNITY_UNSAVED, { entityId: id, entityType: item.type })

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ArrowLeft, Bookmark, Check, ExternalLink, MapPin } from 'lucide-react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getProfile } from '../services/profileService'
 import { getCollegeById, getCollegeEligibility } from '../services/collegeService'
 import { getSavedCollegeIds, toggleSavedCollege } from '../services/savedCollegeService'
@@ -8,9 +8,12 @@ import ProgressBar from '../components/common/ProgressBar'
 import { MapCanvas } from './Discover'
 import FeedbackPrompt from '../components/common/FeedbackPrompt'
 import { recordInteraction, INTERACTION_EVENTS } from '../services/interactionService'
+import { useAuth } from '../services/authService'
 
 export default function CollegeDetails() {
   const { id } = useParams()
+  const navigate = useNavigate()
+  const { configured, user } = useAuth()
   const college = getCollegeById(id)
   const profile = getProfile()
   const [saved, setSaved] = useState(() => getSavedCollegeIds().includes(id))
@@ -21,6 +24,10 @@ export default function CollegeDetails() {
   const eligibility = getCollegeEligibility(profile, college)
   const nextStep = eligibility.entranceRequired ? 'Prepare for the entrance exam, then check the application dates.' : eligibility.eligibilityStatus === 'eligible' ? 'Check the admission form and verify the latest requirements.' : 'Verify the latest eligibility requirements before applying.'
   const toggleSave = () => {
+    if (configured && !user) {
+      navigate('/auth', { state: { from: `/college/${id}` } })
+      return
+    }
     const nextSaved = toggleSavedCollege(id).includes(id)
     setSaved(nextSaved)
     recordInteraction(nextSaved ? INTERACTION_EVENTS.COLLEGE_SAVED : INTERACTION_EVENTS.COLLEGE_UNSAVED, { entityId: id, entityType: 'College' })

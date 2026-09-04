@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Check, ThumbsDown, ThumbsUp } from 'lucide-react'
 import { hasSubmittedFeedback, saveFeedback } from '../../services/feedbackService'
+import { Link } from 'react-router-dom'
+import { useAuth } from '../../services/authService'
 
 const defaultReasons = {
   positive: ['Matches my skills', "I'm eligible", 'Good location', 'Useful information', 'Good opportunity', 'Other'],
@@ -13,11 +15,13 @@ const collegeReasons = {
 }
 
 export default function FeedbackPrompt({ opportunityId, opportunityType }) {
+  const { configured, user } = useAuth()
   const [submitted, setSubmitted] = useState(() => hasSubmittedFeedback(opportunityId, opportunityType))
   const [value, setValue] = useState(null)
   const [reasons, setReasons] = useState([])
   const [comment, setComment] = useState('')
   if (submitted) return <section className="feedback-prompt feedback-complete"><Check size={16} /> Thanks — your feedback helps us make recommendations better.</section>
+  if (configured && !user) return <section className="feedback-prompt"><strong>Want to help improve EduSearch?</strong><span>Log in to leave feedback tied to your account.</span><Link className="button button-ghost" to="/auth">Log in to give feedback</Link></section>
   const options = opportunityType === 'College' ? collegeReasons : defaultReasons
   const toggleReason = (reason) => setReasons((current) => current.includes(reason) ? current.filter((item) => item !== reason) : [...current, reason])
   const submit = () => {

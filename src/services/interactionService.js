@@ -1,4 +1,6 @@
 import { getStudentId } from './feedbackService'
+import { getActiveUserId } from './authService'
+import { isUuid, supabase } from '../lib/supabaseClient'
 
 export const INTERACTION_EVENTS = {
   OPPORTUNITY_VIEWED: 'OPPORTUNITY_VIEWED',
@@ -27,9 +29,26 @@ function getStored() {
 }
 
 export function recordInteraction(eventType, { entityId = null, entityType = null, metadata = {} } = {}) {
-  const record = { id: `${getStudentId()}-${Date.now()}-${eventType}`, studentId: getStudentId(), eventType, entityId, entityType, metadata, timestamp: new Date().toISOString() }
+  const studentId = getActiveUserId() || getStudentId()
+  const record = { id: `${studentId}-${Date.now()}-${eventType}`, studentId, eventType, entityId, entityType, metadata, timestamp: new Date().toISOString() }
   localStorage.setItem(INTERACTIONS_KEY, JSON.stringify([...getStored(), record]))
+  syncInteraction(record)
   return record
+}
+
+async function syncInteraction(record) {
+  if (!supabase) return
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  const { error } = await supabase.from('interactions').insert({
+    user_id: user.id,
+    student_id: record.studentId,
+    event_type: record.eventType,
+    entity_type: record.entityType,
+    entity_id: isUuid(record.entityId) ? record.entityId : null,
+    metadata: record.metadata
+  })
+  if (error) console.error('Could not sync interaction to Supabase.', error)
 }
 
 export function getAllInteractions() {
