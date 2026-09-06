@@ -1,13 +1,16 @@
+import { getActiveUserId } from './authService'
+
 const SAVED_KEY = 'edusearch-saved-opportunities'
+const getStorageKey = () => getActiveUserId() ? `${SAVED_KEY}-${getActiveUserId()}` : SAVED_KEY
 
 export function getSavedOpportunityIds() {
-  try { return JSON.parse(localStorage.getItem(SAVED_KEY)) || [] } catch { return [] }
+  try { return JSON.parse(localStorage.getItem(getStorageKey())) || [] } catch { return [] }
 }
 
 export function toggleSavedOpportunity(id) {
   const saved = getSavedOpportunityIds()
   const next = saved.includes(id) ? saved.filter((savedId) => savedId !== id) : [...saved, id]
-  localStorage.setItem(SAVED_KEY, JSON.stringify(next))
+  localStorage.setItem(getStorageKey(), JSON.stringify(next))
   syncSavedItem(id, next.includes(id))
   return next
 }

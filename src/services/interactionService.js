@@ -18,10 +18,11 @@ export const INTERACTION_EVENTS = {
 }
 
 const INTERACTIONS_KEY = 'edusearch-interactions'
+const getStorageKey = () => getActiveUserId() ? `${INTERACTIONS_KEY}-${getActiveUserId()}` : INTERACTIONS_KEY
 
 function getStored() {
   try {
-    const value = JSON.parse(localStorage.getItem(INTERACTIONS_KEY))
+    const value = JSON.parse(localStorage.getItem(getStorageKey()))
     return Array.isArray(value) ? value : []
   } catch {
     return []
@@ -31,7 +32,7 @@ function getStored() {
 export function recordInteraction(eventType, { entityId = null, entityType = null, metadata = {} } = {}) {
   const studentId = getActiveUserId() || getStudentId()
   const record = { id: `${studentId}-${Date.now()}-${eventType}`, studentId, eventType, entityId, entityType, metadata, timestamp: new Date().toISOString() }
-  localStorage.setItem(INTERACTIONS_KEY, JSON.stringify([...getStored(), record]))
+  localStorage.setItem(getStorageKey(), JSON.stringify([...getStored(), record]))
   syncInteraction(record)
   return record
 }
@@ -56,5 +57,5 @@ export function getAllInteractions() {
 }
 
 export function clearInteractionData() {
-  localStorage.removeItem(INTERACTIONS_KEY)
+  localStorage.removeItem(getStorageKey())
 }

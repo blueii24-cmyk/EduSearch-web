@@ -4,11 +4,10 @@ import { Link } from 'react-router-dom'
 import OpportunityCard from '../components/opportunities/OpportunityCard'
 import FitSummary from '../components/common/FitSummary'
 import { opportunities, getDistanceKm } from '../services/opportunityService'
-import { getProfile } from '../services/profileService'
 import { matchProfileToOpportunity } from '../services/matchingService'
 import MapCanvas from '../components/common/MapCanvas'
 
-export default function Dashboard({ profile = getProfile() }) {
+export default function Dashboard({ profile }) {
   const nearby = useMemo(() => opportunities.filter((item) => getDistanceKm(item) <= 25), [])
   const recommended = useMemo(() => nearby.map((item) => ({ item, match: matchProfileToOpportunity(profile, item) })).sort((a, b) => b.match.matchPercentage - a.match.matchPercentage).slice(0, 4), [nearby, profile])
   const allMatches = nearby.map((item) => matchProfileToOpportunity(profile, item))

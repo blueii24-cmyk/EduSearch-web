@@ -1,13 +1,16 @@
+import { getActiveUserId } from './authService'
+
 const SAVED_COLLEGES_KEY = 'edusearch-saved-colleges'
+const getStorageKey = () => getActiveUserId() ? `${SAVED_COLLEGES_KEY}-${getActiveUserId()}` : SAVED_COLLEGES_KEY
 
 export function getSavedCollegeIds() {
-  try { return JSON.parse(localStorage.getItem(SAVED_COLLEGES_KEY)) || [] } catch { return [] }
+  try { return JSON.parse(localStorage.getItem(getStorageKey())) || [] } catch { return [] }
 }
 
 export function toggleSavedCollege(id) {
   const saved = getSavedCollegeIds()
   const next = saved.includes(id) ? saved.filter((savedId) => savedId !== id) : [...saved, id]
-  localStorage.setItem(SAVED_COLLEGES_KEY, JSON.stringify(next))
+  localStorage.setItem(getStorageKey(), JSON.stringify(next))
   syncSavedCollege(id, next.includes(id))
   return next
 }

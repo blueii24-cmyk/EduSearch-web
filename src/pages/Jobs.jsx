@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react'
 import { ChevronRight, MapPin } from 'lucide-react'
-import { getProfile } from '../services/profileService'
 import { opportunities } from '../services/opportunityService'
 import { matchProfileToOpportunity } from '../services/matchingService'
 import JobCard from '../components/opportunities/JobCard'
@@ -10,8 +9,7 @@ import { recordInteraction, INTERACTION_EVENTS } from '../services/interactionSe
 
 const initialFilters = { distance: 'any', jobType: 'all', experience: 'all', skills: 'all', category: 'all' }
 
-export default function Jobs() {
-  const profile = getProfile()
+export default function Jobs({ profile }) {
   const [query, setQuery] = useState('')
   const [filters, setFilters] = useState(initialFilters)
   const [filtersOpen, setFiltersOpen] = useState(false)

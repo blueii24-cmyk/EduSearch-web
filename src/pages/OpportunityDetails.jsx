@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { ArrowLeft, Bookmark, Check, ExternalLink, MapPin } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getOpportunityById } from '../services/opportunityService'
-import { getProfile } from '../services/profileService'
 import { matchProfileToOpportunity } from '../services/matchingService'
 import { getSavedOpportunityIds, toggleSavedOpportunity } from '../services/savedOpportunityService'
 import { getSavedJobIds, toggleSavedJob } from '../services/savedJobService'
@@ -13,12 +12,11 @@ import FeedbackPrompt from '../components/common/FeedbackPrompt'
 import { recordInteraction, INTERACTION_EVENTS } from '../services/interactionService'
 import { useAuth } from '../services/authService'
 
-export default function OpportunityDetails() {
+export default function OpportunityDetails({ profile }) {
   const { id } = useParams()
   const navigate = useNavigate()
   const { configured, user } = useAuth()
   const item = getOpportunityById(id)
-  const profile = getProfile()
   const isJob = item?.type === 'Job'
   const [saved, setSaved] = useState(() => isJob ? getSavedJobIds().includes(id) : getSavedOpportunityIds().includes(id))
   useEffect(() => {

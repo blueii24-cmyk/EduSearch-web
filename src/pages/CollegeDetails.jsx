@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ArrowLeft, Bookmark, Check, ExternalLink, MapPin } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { getProfile } from '../services/profileService'
 import { getCollegeById, getCollegeEligibility } from '../services/collegeService'
 import { getSavedCollegeIds, toggleSavedCollege } from '../services/savedCollegeService'
 import ProgressBar from '../components/common/ProgressBar'
@@ -10,12 +9,11 @@ import FeedbackPrompt from '../components/common/FeedbackPrompt'
 import { recordInteraction, INTERACTION_EVENTS } from '../services/interactionService'
 import { useAuth } from '../services/authService'
 
-export default function CollegeDetails() {
+export default function CollegeDetails({ profile }) {
   const { id } = useParams()
   const navigate = useNavigate()
   const { configured, user } = useAuth()
   const college = getCollegeById(id)
-  const profile = getProfile()
   const [saved, setSaved] = useState(() => getSavedCollegeIds().includes(id))
   useEffect(() => {
     if (college) recordInteraction(INTERACTION_EVENTS.COLLEGE_VIEWED, { entityId: college.id, entityType: 'College' })

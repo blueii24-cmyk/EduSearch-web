@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react'
 import { ArrowRight, Bookmark, Check, List, Map as MapIcon, MapPin, Search, X } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { opportunities, getDistanceKm } from '../services/opportunityService'
-import { getProfile } from '../services/profileService'
 import { matchProfileToOpportunity } from '../services/matchingService'
 import { getCollegeEligibility } from '../services/collegeService'
 import { getSavedOpportunityIds, toggleSavedOpportunity } from '../services/savedOpportunityService'
@@ -14,10 +13,9 @@ import SearchBar from '../components/common/SearchBar'
 import FitSummary from '../components/common/FitSummary'
 import MapCanvas from '../components/common/MapCanvas'
 
-export default function Explore() {
+export default function Explore({ profile }) {
   const navigate = useNavigate()
   const { configured, user } = useAuth()
-  const profile = getProfile()
   const [query, setQuery] = useState('')
   const [type, setType] = useState('All')
   const [distance, setDistance] = useState('any')

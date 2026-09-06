@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react'
 import { ChevronRight, MapPin } from 'lucide-react'
-import { getProfile } from '../services/profileService'
 import { getCollegeEligibility, searchColleges } from '../services/collegeService'
 import CollegeCard from '../components/opportunities/CollegeCard'
 import SearchBar from '../components/common/SearchBar'
@@ -9,8 +8,7 @@ import { recordInteraction, INTERACTION_EVENTS } from '../services/interactionSe
 
 const initialFilters = { distance: 'any', level: 'all', course: 'all', eligibility: 'all', admission: 'all' }
 
-export default function Colleges() {
-  const profile = getProfile()
+export default function Colleges({ profile }) {
   const [query, setQuery] = useState('')
   const [filters, setFilters] = useState(initialFilters)
   const [filtersOpen, setFiltersOpen] = useState(false)

@@ -35,8 +35,19 @@ export async function signIn(email, password) {
 
 export async function signOut() {
   if (!supabase) return
+  const currentUserId = getActiveUserId()
   const { error } = await supabase.auth.signOut()
   if (error) throw error
+  setActiveUser(null)
+  if (currentUserId) {
+    localStorage.removeItem(`edusearch-profile-${currentUserId}`)
+    localStorage.removeItem(`edusearch-feedback-${currentUserId}`)
+    localStorage.removeItem(`edusearch-interactions-${currentUserId}`)
+    localStorage.removeItem(`edusearch_student_id-${currentUserId}`)
+    localStorage.removeItem(`edusearch-saved-opportunities-${currentUserId}`)
+    localStorage.removeItem(`edusearch-saved-jobs-${currentUserId}`)
+    localStorage.removeItem(`edusearch-saved-colleges-${currentUserId}`)
+  }
 }
 
 export async function getCurrentSession() {

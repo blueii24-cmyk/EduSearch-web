@@ -2,6 +2,7 @@ import { getActiveUserId } from './authService'
 
 const FEEDBACK_KEY = 'edusearch-feedback'
 const STUDENT_ID_KEY = 'edusearch_student_id'
+const getStorageKey = (key) => getActiveUserId() ? `${key}-${getActiveUserId()}` : key
 
 function read(key, fallback = []) {
   try {
@@ -15,15 +16,15 @@ function read(key, fallback = []) {
 export function getStudentId() {
   const authenticatedId = getActiveUserId()
   if (authenticatedId) return authenticatedId
-  const existing = localStorage.getItem(STUDENT_ID_KEY)
+  const existing = localStorage.getItem(getStorageKey(STUDENT_ID_KEY))
   if (existing) return existing
   const id = `student-${Date.now()}`
-  localStorage.setItem(STUDENT_ID_KEY, id)
+  localStorage.setItem(getStorageKey(STUDENT_ID_KEY), id)
   return id
 }
 
 export function getAllFeedback() {
-  return read(FEEDBACK_KEY)
+  return read(getStorageKey(FEEDBACK_KEY))
 }
 
 export function hasSubmittedFeedback(opportunityId, opportunityType) {
@@ -43,14 +44,14 @@ export function saveFeedback({ opportunityId, opportunityType, feedbackValue, re
     createdAt: new Date().toISOString()
   }
 
-  localStorage.setItem(FEEDBACK_KEY, JSON.stringify([...getAllFeedback(), record]))
+  localStorage.setItem(getStorageKey(FEEDBACK_KEY), JSON.stringify([...getAllFeedback(), record]))
   submitFeedback(record)
   return record
 }
 
 export function saveGeneralFeedback({ rating, category, comment = '' }) {
   const record = { id: `${getStudentId()}-general-${Date.now()}`, studentId: getStudentId(), type: 'general', rating, category, comment: comment.trim(), createdAt: new Date().toISOString() }
-  localStorage.setItem(FEEDBACK_KEY, JSON.stringify([...getAllFeedback(), record]))
+  localStorage.setItem(getStorageKey(FEEDBACK_KEY), JSON.stringify([...getAllFeedback(), record]))
   submitFeedback(record)
   return record
 }
@@ -84,7 +85,7 @@ export async function getMyFeedback() {
 
 export function getAllInteractions() {
   try {
-    const value = JSON.parse(localStorage.getItem('edusearch-interactions'))
+    const value = JSON.parse(localStorage.getItem(getStorageKey('edusearch-interactions')))
     return Array.isArray(value) ? value : []
   } catch {
     return []
@@ -92,8 +93,8 @@ export function getAllInteractions() {
 }
 
 export function clearFeedbackData() {
-  localStorage.removeItem(FEEDBACK_KEY)
-  localStorage.removeItem('edusearch-interactions')
-  localStorage.removeItem('edusearch_student_id')
+  localStorage.removeItem(getStorageKey(FEEDBACK_KEY))
+  localStorage.removeItem(getStorageKey('edusearch-interactions'))
+  localStorage.removeItem(getStorageKey(STUDENT_ID_KEY))
 }
 import { isUuid, supabase } from '../lib/supabaseClient'
