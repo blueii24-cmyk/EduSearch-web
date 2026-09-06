@@ -5,7 +5,23 @@ let activeUserId = null
 
 export async function signUp(email, password) {
   if (!supabase) throw new Error('Supabase authentication is not configured.')
-  const { data, error } = await supabase.auth.signUp({ email, password })
+  const emailRedirectTo = `${window.location.origin}/auth/callback`
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo }
+  })
+  if (error) throw error
+  return data
+}
+
+export async function resendConfirmation(email) {
+  if (!supabase) throw new Error('Supabase authentication is not configured.')
+  const { data, error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+  })
   if (error) throw error
   return data
 }
@@ -37,7 +53,7 @@ export async function getCurrentUser() {
 
 export function onAuthStateChange(callback) {
   if (!supabase) return () => {}
-  const { data } = supabase.auth.onAuthStateChange((_event, session) => callback(session))
+  const { data } = supabase.auth.onAuthStateChange((event, session) => callback(event, session))
   return () => data.subscription.unsubscribe()
 }
 

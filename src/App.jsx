@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import Auth from './pages/Auth'
+import AuthCallback from './pages/AuthCallback'
 import Landing from './pages/Landing'
 import Profile from './pages/Profile'
 import Discover from './pages/Discover'
@@ -33,13 +34,24 @@ export default function App() {
       setActiveUser(nextSession?.user)
       setAuthLoading(false)
       if (nextSession) getAuthenticatedProfile().then((nextProfile) => nextProfile && mounted && setProfile(nextProfile))
-    }).catch(() => {
-      if (mounted) setAuthLoading(false)
+    }).catch((error) => {
+      if (mounted) {
+        console.error('EduSearch could not restore the Supabase session.', error)
+        setAuthLoading(false)
+      }
     })
-    const unsubscribe = onAuthStateChange((nextSession) => {
+    const unsubscribe = onAuthStateChange((event, nextSession) => {
       setSession(nextSession)
       setActiveUser(nextSession?.user)
-      if (nextSession) getAuthenticatedProfile().then((nextProfile) => nextProfile && setProfile(nextProfile))
+      if (event === 'SIGNED_OUT') return
+      if (event === 'INITIAL_SESSION') setAuthLoading(false)
+      if (nextSession) {
+        setTimeout(() => {
+          getAuthenticatedProfile()
+            .then((nextProfile) => nextProfile && mounted && setProfile(nextProfile))
+            .catch((error) => console.error('EduSearch could not load the authenticated profile.', error))
+        }, 0)
+      }
     })
     return () => {
       mounted = false
@@ -49,5 +61,5 @@ export default function App() {
 
   const handleSave = (nextProfile) => setProfile(saveProfile(nextProfile))
   const authValue = useMemo(() => ({ configured: supabaseConfigured, loading: authLoading, session, user: session?.user || null, signOut }), [authLoading, session])
-  return <BrowserRouter><AuthContext.Provider value={authValue}><Layout profile={profile}><Routes><Route path="/" element={<Landing profile={profile} />} /><Route path="/auth" element={<Auth />} /><Route element={<ProtectedRoute />}><Route path="/profile" element={<Profile profile={profile} onSave={handleSave} />} /><Route path="/dashboard" element={<Dashboard profile={profile} />} /></Route><Route path="/discover" element={<Discover profile={profile} />} /><Route path="/colleges" element={<Colleges />} /><Route path="/jobs" element={<Jobs />} /><Route path="/internships" element={<Internships />} /><Route path="/explore" element={<Explore />} /><Route path="/map" element={<Map />} /><Route path="/paths" element={<Paths />} /><Route path="/opportunity/:id" element={<OpportunityDetails />} /><Route path="/college/:id" element={<CollegeDetails />} /></Routes></Layout></AuthContext.Provider></BrowserRouter>
+  return <BrowserRouter><AuthContext.Provider value={authValue}><Layout profile={profile}><Routes><Route path="/" element={<Landing profile={profile} />} /><Route path="/auth" element={<Auth />} /><Route path="/login" element={<Auth />} /><Route path="/auth/callback" element={<AuthCallback />} /><Route element={<ProtectedRoute />}><Route path="/profile" element={<Profile profile={profile} onSave={handleSave} />} /><Route path="/dashboard" element={<Dashboard profile={profile} />} /></Route><Route path="/discover" element={<Discover profile={profile} />} /><Route path="/colleges" element={<Colleges />} /><Route path="/jobs" element={<Jobs />} /><Route path="/internships" element={<Internships />} /><Route path="/explore" element={<Explore />} /><Route path="/map" element={<Map />} /><Route path="/paths" element={<Paths />} /><Route path="/opportunity/:id" element={<OpportunityDetails />} /><Route path="/college/:id" element={<CollegeDetails />} /></Routes></Layout></AuthContext.Provider></BrowserRouter>
 }

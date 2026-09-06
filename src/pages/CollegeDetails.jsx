@@ -5,7 +5,7 @@ import { getProfile } from '../services/profileService'
 import { getCollegeById, getCollegeEligibility } from '../services/collegeService'
 import { getSavedCollegeIds, toggleSavedCollege } from '../services/savedCollegeService'
 import ProgressBar from '../components/common/ProgressBar'
-import { MapCanvas } from './Discover'
+import MapCanvas from '../components/common/MapCanvas'
 import FeedbackPrompt from '../components/common/FeedbackPrompt'
 import { recordInteraction, INTERACTION_EVENTS } from '../services/interactionService'
 import { useAuth } from '../services/authService'
@@ -25,7 +25,7 @@ export default function CollegeDetails() {
   const nextStep = eligibility.entranceRequired ? 'Prepare for the entrance exam, then check the application dates.' : eligibility.eligibilityStatus === 'eligible' ? 'Check the admission form and verify the latest requirements.' : 'Verify the latest eligibility requirements before applying.'
   const toggleSave = () => {
     if (configured && !user) {
-      navigate('/auth', { state: { from: `/college/${id}` } })
+      navigate('/login', { state: { from: `/college/${id}` } })
       return
     }
     const nextSaved = toggleSavedCollege(id).includes(id)

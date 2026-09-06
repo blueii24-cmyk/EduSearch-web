@@ -21,7 +21,7 @@ export default function FeedbackPrompt({ opportunityId, opportunityType }) {
   const [reasons, setReasons] = useState([])
   const [comment, setComment] = useState('')
   if (submitted) return <section className="feedback-prompt feedback-complete"><Check size={16} /> Thanks — your feedback helps us make recommendations better.</section>
-  if (configured && !user) return <section className="feedback-prompt"><strong>Want to help improve EduSearch?</strong><span>Log in to leave feedback tied to your account.</span><Link className="button button-ghost" to="/auth">Log in to give feedback</Link></section>
+  if (configured && !user) return <section className="feedback-prompt"><strong>Want to help improve EduSearch?</strong><span>Log in to leave feedback tied to your account.</span><Link className="button button-ghost" to="/login">Log in to give feedback</Link></section>
   const options = opportunityType === 'College' ? collegeReasons : defaultReasons
   const toggleReason = (reason) => setReasons((current) => current.includes(reason) ? current.filter((item) => item !== reason) : [...current, reason])
   const submit = () => {

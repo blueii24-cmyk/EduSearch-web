@@ -32,7 +32,7 @@ export default function OpportunityDetails() {
   const nextStep = match.missingSkills.length ? `Learn ${match.missingSkills.slice(0, 2).join(' and ')}, then build one project before applying.` : 'Apply now — your current skills align well.'
   const toggleSave = () => {
     if (configured && !user) {
-      navigate('/auth', { state: { from: `/opportunity/${id}` } })
+      navigate('/login', { state: { from: `/opportunity/${id}` } })
       return
     }
     const nextSaved = (isJob ? toggleSavedJob(id) : toggleSavedOpportunity(id)).includes(id)
